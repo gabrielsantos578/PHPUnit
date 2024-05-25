@@ -5,7 +5,7 @@ use PDOException;
 use Exception;
 use PDO;
 
-class Database
+class Connection
 {
     private $host = 'localhost';
     private $port = '5432';

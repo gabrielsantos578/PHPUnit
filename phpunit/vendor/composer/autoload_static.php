@@ -23,7 +23,8 @@ class ComposerStaticInita50aa7a4aac6a4ff483de5f21554c3ee
         'A' => 
         array (
             'App\\Tests\\' => 10,
-            'App\\' => 4,
+            'App\\Pages\\' => 10,
+            'App\\Database\\' => 13,
         ),
     );
 
@@ -40,9 +41,13 @@ class ComposerStaticInita50aa7a4aac6a4ff483de5f21554c3ee
         array (
             0 => __DIR__ . '/../..' . '/tests',
         ),
-        'App\\' => 
+        'App\\Pages\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/src',
+            0 => __DIR__ . '/../..' . '/src/pages',
+        ),
+        'App\\Database\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src/database',
         ),
     );
 

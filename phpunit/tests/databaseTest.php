@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 namespace App\Tests;
 
-use App\Database\database;
-use App\Database\response;
+use App\Database\Connection;
+use App\Database\Response;
 use PHPUnit\Framework\TestCase;
 use Exception;
 use PDO;
@@ -13,30 +13,42 @@ final class DatabaseTest extends TestCase
 
     public function testConnection(): void
     {
-        echo "Connection test...\n";
+        try {
+            echo "Connection test...\n";
 
-        $db = new Database(); // Error: Class "App\Database\database" not found
-        $response = $db->select("SELECT 1");
+            $conn = new Connection();
+            $response = $conn->select("SELECT 1");
 
-        $this->assertInstanceOf(Response::class, $response);
-        $this->assertTrue($response->status);
-        $this->assertSame("Consulta executada com sucesso.", $response->message);
-        $this->assertNotNull($response->data);
+            $this->assertInstanceOf(Response::class, $response);
+            $this->assertTrue($response->status);
+            $this->assertSame("Consulta executada com sucesso.", $response->message);
+            $this->assertNotNull($response->data);
+        } catch (\Exception $e) {
+            $this->fail("Exception during testConnection: " . $e->getMessage());
+        }
     }
 
     public function testCreateDatabase(): void
     {
-        echo "Create database test...\n";
+        try {
+            echo "Create database test...\n";
 
-        $pdo = $this->createPDOConnection();
+            $pdo = $this->createPDOConnection();
 
-        if (!$this->databaseExists($pdo, self::DB_NAME)) {
-            $this->createDatabase($pdo, self::DB_NAME);
-            $this->assertTrue($this->databaseExists($pdo, self::DB_NAME), 'Falha ao criar o banco de dados.');
-            $this->createUserTable($pdo);
-            $this->assertTrue($this->tableExists($pdo, 'User'), 'Falha ao criar a tabela User.');
-        } else {
-            throw new Exception('O banco de dados já existe. Nenhuma ação necessária.');
+            if (!$this->databaseExists($pdo, self::DB_NAME)) {
+                $this->createDatabase($pdo, self::DB_NAME);
+                $this->assertTrue($this->databaseExists($pdo, self::DB_NAME), 'Falha ao criar o banco de dados.');
+
+                $pdo = $this->createPDOConnectionToDB();
+                $this->createTables($pdo);
+
+                $this->assertTrue($this->tableExists($pdo, 'users'), 'Falha ao criar a tabela Users.');
+                $this->assertTrue($this->tableExists($pdo, 'sessions'), 'Falha ao criar a tabela Sessions.');
+            } else {
+                throw new Exception('O banco de dados já existe. Nenhuma ação necessária.');
+            }
+        } catch (\Exception $e) {
+            $this->fail("Exception during testCreateDatabase: " . $e->getMessage());
         }
     }
 
@@ -50,6 +62,20 @@ final class DatabaseTest extends TestCase
 
         // Cria uma nova conexão PDO
         $dsn = "pgsql:host=$host;port=$port";
+        return new PDO($dsn, $user, $password);
+    }
+
+    private function createPDOConnectionToDB(): PDO
+    {
+        // Configurações de conexão
+        $host = 'localhost';
+        $port = '5432';
+        $dbname = self::DB_NAME;
+        $user = 'postgres';
+        $password = '123456';
+
+        // Cria uma nova conexão PDO
+        $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
         return new PDO($dsn, $user, $password);
     }
 
@@ -85,10 +111,10 @@ final class DatabaseTest extends TestCase
         return $stmt->fetchColumn() === 't';
     }
 
-    private function createUserTable(PDO $pdo): void
+    private function createTables(PDO $pdo): void
     {
-        // Consulta para criar a tabela User
-        $sql = "CREATE TABLE User (
+        // Consulta para criar a tabela Users
+        $sqlUsers = "CREATE TABLE Users (
             id SERIAL PRIMARY KEY,
             username VARCHAR(50) NOT NULL,
             email VARCHAR(100) NOT NULL,
@@ -96,6 +122,16 @@ final class DatabaseTest extends TestCase
             created_at VARCHAR(19) DEFAULT TO_CHAR(CURRENT_TIMESTAMP, 'DD/MM/YYYY HH24:MI:SS')
         )";
 
-        $pdo->exec($sql);
+        // Consulta para criar a tabela Sessions
+        $sqlSessions = "CREATE TABLE Sessions (
+            id SERIAL PRIMARY KEY,
+            dateOpening VARCHAR(19) DEFAULT TO_CHAR(CURRENT_TIMESTAMP, 'DD/MM/YYYY HH24:MI:SS'),
+            dateClosure VARCHAR(19),
+            idUser INT NOT NULL,
+            CONSTRAINT FK_idUser FOREIGN KEY (idUser) REFERENCES Users(id)
+        )";
+
+        $pdo->exec($sqlUsers);
+        $pdo->exec($sqlSessions);
     }
 }

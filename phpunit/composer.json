@@ -1,12 +1,13 @@
 {
     "autoload": {
         "psr-4": {
-            "App\\": "src"
+            "App\\Database\\": "src/database/",
+            "App\\Pages\\": "src/pages/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "App\\Tests\\": "tests"
+            "App\\Tests\\": "tests/"
         }
     },
     "require-dev": {

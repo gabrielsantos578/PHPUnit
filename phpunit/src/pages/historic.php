@@ -1,7 +1,7 @@
 <?php
 namespace App\Pages;
 
-use App\Database\Database;
+use App\Database\Connection;
 
 // Função para verificar se o usuário está logado
 function isUserLoggedIn() {
@@ -10,36 +10,36 @@ function isUserLoggedIn() {
 
 // Função para obter todas as sessões
 function getAllSessions() {
-    $database = new Database();
-    $response = $database->select("SELECT * FROM Sessions");
+    $conn = new Connection();
+    $response = $conn->select("SELECT * FROM Sessions");
     return $response->data;
 }
 
 // Função para obter todos os usuários
 function getAllUsers() {
-    $database = new Database();
-    $response = $database->select("SELECT * FROM Users");
+    $conn = new Connection();
+    $response = $conn->select("SELECT * FROM Users");
     return $response->data;
 }
 
 // Função para obter as sessões ativas
 function getActiveSessions() {
-    $database = new Database();
-    $response = $database->select("SELECT * FROM Sessions WHERE dateClosure IS NULL");
+    $conn = new Connection();
+    $response = $conn->select("SELECT * FROM Sessions WHERE dateClosure IS NULL");
     return $response->data;
 }
 
 // Função para obter o histórico de sessões
 function getSessionHistory() {
-    $database = new Database();
-    $response = $database->select("SELECT * FROM Sessions WHERE dateClosure IS NOT NULL");
+    $conn = new Connection();
+    $response = $conn->select("SELECT * FROM Sessions WHERE dateClosure IS NOT NULL");
     return $response->data;
 }
 
 // Função para obter o nome de usuário pelo ID de usuário
 function getUserName($userId) {
-    $database = new Database();
-    $response = $database->select("SELECT username FROM Users WHERE id = $userId");
+    $conn = new Connection();
+    $response = $conn->select("SELECT username FROM Users WHERE id = $userId");
 
     if ($response->status && count($response->data) > 0) {
         return $response->data[0]['username'];
@@ -50,8 +50,8 @@ function getUserName($userId) {
 
 // Função para verificar se o usuário está ativo
 function isUserActive($userId) {
-    $database = new Database();
-    $response = $database->select("SELECT id FROM Sessions WHERE idUser = $userId AND dateClosure IS NULL");
+    $conn = new Connection();
+    $response = $conn->select("SELECT id FROM Sessions WHERE idUser = $userId AND dateClosure IS NULL");
 
     return $response->status && count($response->data) > 0;
 }

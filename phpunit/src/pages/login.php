@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Pages;
 
-use App\Database\Database;
+use App\Database\Connection;
 
 // Inicializa a sessão
 session_start();
@@ -26,8 +26,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $password = $_POST['password'];
 
         // Verifica se o email e a senha correspondem a um usuário no banco de dados
-        $database = new Database();
-        $response = $database->select("SELECT id FROM Users WHERE email = '$email' AND password = '$password'");
+        $conn = new Connection();
+        $response = $conn->select("SELECT id FROM Users WHERE email = '$email' AND password = '$password'");
 
         // Se o login for bem-sucedido, insere a sessão no banco de dados
         if ($response->status && count($response->data) > 0) {
@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Insere a sessão no banco de dados
             $dateOpening = date('d/m/Y H:i:s');
             $dateClosure = null; // A data de fechamento é definida como null inicialmente
-            $database->insert("INSERT INTO Sessions (idUser) VALUES ($userId)");
+            $conn->insert("INSERT INTO Sessions (idUser) VALUES ($userId)");
 
             // Define o ID do usuário na sessão
             $_SESSION['user_id'] = $userId;
